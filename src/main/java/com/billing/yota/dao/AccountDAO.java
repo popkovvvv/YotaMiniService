@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 
 @Repository
@@ -21,9 +22,17 @@ public class AccountDAO {
 
     @Transactional
     public void update(long number, boolean isCan) {
-        manager.createQuery("UPDATE Account a SET a.isCanTransfer= :p where a.number = :n")
-                .setParameter("p", isCan)
-                .setParameter("n", number);
+        Query query = manager.createNativeQuery("UPDATE account SET is_can_transfer= :p where number = :n");
+        query.setParameter("p", isCan);
+        query.setParameter("n", number);
+        query.executeUpdate();
+    }
+
+    public boolean checkCanTransaction(long number) {
+        return manager.createQuery(
+                "select account.isCanTransfer from Account account where account.number = :n", Boolean.class)
+                .setParameter("n", number)
+                .getSingleResult();
     }
 
     public Account findByNumber(long number) {
@@ -34,26 +43,17 @@ public class AccountDAO {
     }
 
     @Transactional
-    public void changeBalance(long number, double amount) throws TransactionException {
-        Account account = this.findByNumber(number);
-        if (account == null) {
-            throw new TransactionException("Account with number: " + number + " not found");
-        }
-        double newBalance = account.getBalance() + amount;
-        if (account.getBalance() + amount < 0) {
-            throw new TransactionException(
-                    "The money in the account '" + number + "' is not enough (" + account.getBalance() + ")");
-        }
-        account.setBalance(newBalance);
+    public void changeBalance(long number, double amount) {
         // Update to DB
-        String sqlUpdate = "Update Account set balance = :p where id = :i";
-        manager.createQuery(sqlUpdate).setParameter("p", account.getBalance())
-                .setParameter("i", account.getId());
-
+        manager.createQuery(
+                "Update Account account set account.balance = account.balance + :p where account.number = :i")
+                .setParameter("p", amount)
+                .setParameter("i", number)
+                .executeUpdate();
     }
 
     @Transactional(rollbackOn = TransactionException.class)
-    public void transaction(Long fromAccountNumber, Long toAccountNumber, double amount) throws TransactionException {
+    public void transaction(Long fromAccountNumber, Long toAccountNumber, double amount) {
         changeBalance(toAccountNumber, amount);
         changeBalance(fromAccountNumber, -amount);
     }

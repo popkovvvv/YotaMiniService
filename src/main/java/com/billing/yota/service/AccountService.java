@@ -27,12 +27,16 @@ public class AccountService {
       return accountDAO.findByNumber(number);
     }
 
-    public void transaction( TransferPOJO transferPOJO ) throws TransactionException {
+    public void transaction(TransferPOJO transferPOJO) {
         accountDAO.transaction(transferPOJO.getFromAccountNumber(),transferPOJO.getToAccountNumber(), transferPOJO.getAmount());
     }
 
     public void updateAccountTransfer(long number, boolean isCan) {
         accountDAO.update(number, isCan);
+    }
+
+    public boolean checkCanTransaction(long number) {
+        return accountDAO.checkCanTransaction(number);
     }
 
 
