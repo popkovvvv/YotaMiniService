@@ -15,11 +15,9 @@ public class Transaction {
 
     private LocalDateTime transfer_at;
 
-    @ManyToOne(optional = false)
-    private Account origin;
+    private Long origin;
 
-    @ManyToOne(optional = false)
-    private Account receiver;
+    private Long receiver;
 
     private Double amount;
 
@@ -39,27 +37,27 @@ public class Transaction {
         this.transfer_at = transfer_at;
     }
 
-    public Account getOrigin() {
-        return origin;
-    }
-
-    public void setOrigin( Account origin ) {
-        this.origin = origin;
-    }
-
-    public Account getReceiver() {
-        return receiver;
-    }
-
-    public void setReceiver( Account receiver ) {
-        this.receiver = receiver;
-    }
-
     public Double getAmount() {
         return amount;
     }
 
     public void setAmount( Double amount ) {
         this.amount = amount;
+    }
+
+    public Long getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin( Long origin ) {
+        this.origin = origin;
+    }
+
+    public Long getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver( Long receiver ) {
+        this.receiver = receiver;
     }
 }

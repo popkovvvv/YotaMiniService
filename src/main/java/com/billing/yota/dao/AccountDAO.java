@@ -28,7 +28,7 @@ public class AccountDAO {
         query.executeUpdate();
     }
 
-    public boolean checkCanTransaction(long number) {
+    public boolean checkTransaction(long number) {
         return manager.createQuery(
                 "select account.isCanTransfer from Account account where account.number = :n", Boolean.class)
                 .setParameter("n", number)
@@ -42,18 +42,33 @@ public class AccountDAO {
                 .getSingleResult();
     }
 
+    //TODO: перенести в бизнес логику
     @Transactional
-    public void changeBalance(long number, double amount) {
+    public void changeBalance(long number, double amount) throws TransactionException {
+        Account accountInfo = this.findByNumber(number);
+        if (accountInfo == null) {
+            throw new TransactionException("Account not found " + number);
+        }
+        double newBalance = accountInfo.getBalance() + amount;
+        if (accountInfo.getBalance() + amount < 0) {
+            throw new TransactionException(
+                    "The money in the account '" + number + "' is not enough (" + accountInfo.getBalance() + ")");
+        }
+        if (!accountInfo.isCanTransfer()) {
+            throw new TransactionException(
+                    "Account " + number + " has blocked");
+        }
+        accountInfo.setBalance(newBalance);
         // Update to DB
         manager.createQuery(
-                "Update Account account set account.balance = account.balance + :p where account.number = :i")
-                .setParameter("p", amount)
+                "Update Account account set account.balance = :p where account.number = :i")
+                .setParameter("p", accountInfo.getBalance())
                 .setParameter("i", number)
                 .executeUpdate();
     }
 
     @Transactional(rollbackOn = TransactionException.class)
-    public void transaction(Long fromAccountNumber, Long toAccountNumber, double amount) {
+    public void transaction(Long fromAccountNumber, Long toAccountNumber, double amount) throws TransactionException {
         changeBalance(toAccountNumber, amount);
         changeBalance(fromAccountNumber, -amount);
     }

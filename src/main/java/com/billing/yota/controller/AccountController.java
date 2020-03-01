@@ -34,19 +34,24 @@ public class AccountController {
         return accountService.findByNumber(number);
     }
 
+    @GetMapping("/account/transaction/rollback/{number}")
+    public void getRollBackTransaction(@PathVariable Long number) throws TransactionException {
+        accountService.rollbackTransaction(number);
+    }
+
     @PostMapping("/account/update")
     public void updateBlocked( @RequestParam Long number, @RequestParam Boolean transfer ){
         accountService.updateAccountTransfer(number, transfer);
     }
 
     @PostMapping("/account/transaction")
-    public void transfer(@ModelAttribute("transfer") TransferPOJO transferPOJO ) {
-        accountService.transaction(transferPOJO);
+    public void transfer(@ModelAttribute("transfer") TransferPOJO transferPOJO ) throws TransactionException {
+        accountService.transaction(transferPOJO.getFromAccountNumber(), transferPOJO.getToAccountNumber(), transferPOJO.getAmount());
         transactionService.create(transferPOJO);
     }
 
     @GetMapping("/account/transaction/check/{number}")
     public boolean getCheckTransaction(@PathVariable Long number){
-        return accountService.checkCanTransaction(number);
+        return accountService.checkTransaction(number);
     }
 }

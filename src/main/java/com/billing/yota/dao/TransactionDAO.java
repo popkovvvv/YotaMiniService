@@ -25,24 +25,29 @@ public class TransactionDAO {
 
     @Transactional
     public void create(TransferPOJO transferPOJO) {
-        Account from = accountDAO.findByNumber(transferPOJO.getFromAccountNumber());
-        Account to = accountDAO.findByNumber(transferPOJO.getToAccountNumber());
-        Transaction transaction = new Transaction();
-
-        transaction.setAmount(transferPOJO.getAmount());
-        transaction.setOrigin(from);
-        transaction.setReceiver(to);
-        transaction.setTransfer_at(LocalDateTime.now());
-        manager.persist(transaction);
+        manager.createNativeQuery(
+                "INSERT INTO transaction (amount, transfer_at, origin, receiver) VALUES (?,?,?,?)")
+                .setParameter(1, transferPOJO.getAmount())
+                .setParameter(2, LocalDateTime.now())
+                .setParameter(3, transferPOJO.getFromAccountNumber())
+                .setParameter(4, transferPOJO.getToAccountNumber())
+                .executeUpdate();
     }
 
-    //TODO: пофиксить
     @Transactional
     public List<Transaction> getListByNumber(long number) {
-      TypedQuery<Transaction> typedQuery =  manager.createQuery(
-        "SELECT number from Transaction t INNER JOIN t.origin.number number where number = :n", Transaction.class)
-                .setParameter("n", number);
+        return manager.createQuery(
+                "select tr FROM Transaction tr WHERE tr.origin = :o ", Transaction.class)
+                .setParameter("o", number)
+                .getResultList();
+    }
 
-      return typedQuery.getResultStream().collect(Collectors.toList());
+    @Transactional
+    public Transaction getLastTransactionByNumber(long number) {
+        return manager.createQuery(
+                "SELECT tr FROM Transaction tr where tr.origin = :o ORDER BY tr.transfer_at DESC", Transaction.class)
+                .setParameter("o", number)
+                .setMaxResults(1)
+                .getSingleResult();
     }
 }

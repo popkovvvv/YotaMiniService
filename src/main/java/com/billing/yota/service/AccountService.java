@@ -3,21 +3,19 @@ package com.billing.yota.service;
 import com.billing.yota.dao.AccountDAO;
 import com.billing.yota.exception.TransactionException;
 import com.billing.yota.model.entity.Account;
+import com.billing.yota.model.entity.Transaction;
 import com.billing.yota.model.pojo.TransferPOJO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
 @Service
 public class AccountService {
 
-    @PersistenceContext
-    private EntityManager manager;
-
     @Autowired
     AccountDAO accountDAO;
+
+    @Autowired
+    TransactionService transactionService;
 
     public void create(Account account) {
         accountDAO.create(account);
@@ -27,16 +25,21 @@ public class AccountService {
       return accountDAO.findByNumber(number);
     }
 
-    public void transaction(TransferPOJO transferPOJO) {
-        accountDAO.transaction(transferPOJO.getFromAccountNumber(),transferPOJO.getToAccountNumber(), transferPOJO.getAmount());
+    public void transaction(long from, long to, double amount) throws TransactionException {
+        accountDAO.transaction(from, to, amount);
     }
 
     public void updateAccountTransfer(long number, boolean isCan) {
         accountDAO.update(number, isCan);
     }
 
-    public boolean checkCanTransaction(long number) {
-        return accountDAO.checkCanTransaction(number);
+    public boolean checkTransaction(long number) {
+        return accountDAO.checkTransaction(number);
+    }
+
+    public void rollbackTransaction(long number) throws TransactionException {
+       Transaction transaction = transactionService.getLastTransactionByNumber(number);
+       transaction(transaction.getReceiver(), transaction.getOrigin(), transaction.getAmount());
     }
 
 

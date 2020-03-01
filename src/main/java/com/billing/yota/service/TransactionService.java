@@ -22,5 +22,10 @@ public class TransactionService {
         return transactionDAO.getListByNumber(number);
     }
 
+    public Transaction getLastTransactionByNumber(long number) {
+        return transactionDAO.getLastTransactionByNumber(number);
+    }
+
+
 
 }
