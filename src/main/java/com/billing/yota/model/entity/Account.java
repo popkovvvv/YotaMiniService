@@ -13,14 +13,14 @@ public class Account {
     @GeneratedValue
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String fullName;
 
     private double balance;
 
     private boolean isCanTransfer;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private Long number;
 
     public Long getId() {

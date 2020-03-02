@@ -1,16 +1,13 @@
-package com.billing.yota.dao;
+package com.billing.yota.dao.impl;
 
-import com.billing.yota.exception.TransactionException;
 import com.billing.yota.model.entity.Account;
 import org.springframework.stereotype.Repository;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.transaction.Transactional;
 
 @Repository
-public class AccountDAO {
+public class AccountDaoImpl {
 
     @PersistenceContext
     private EntityManager manager;

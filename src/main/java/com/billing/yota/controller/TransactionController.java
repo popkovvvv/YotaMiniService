@@ -2,8 +2,9 @@ package com.billing.yota.controller;
 
 import com.billing.yota.exception.TransactionException;
 import com.billing.yota.model.entity.Transaction;
-import com.billing.yota.service.TransactionService;
+import com.billing.yota.service.impl.TransactionServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,17 +16,21 @@ import java.util.List;
 @RequestMapping("api/v1")
 public class TransactionController {
 
+    private final TransactionServiceImpl transactionServiceImpl;
+
     @Autowired
-    TransactionService transactionService;
+    public TransactionController(TransactionServiceImpl transactionServiceImpl) {
+        this.transactionServiceImpl = transactionServiceImpl;
+    }
 
     @GetMapping("/history/{number}")
     public List<Transaction> getHistoryByNumber( @PathVariable Long number ) {
-        return transactionService.getHistoryByNumber(number);
+        return transactionServiceImpl.getHistoryByNumber(number);
     }
 
     @GetMapping("/account/transaction/rollback/{number}")
-    public void getRollBackTransaction(@PathVariable Long number) throws TransactionException {
-        transactionService.rollbackTransaction(number);
+    public ResponseEntity<String> getRollBackTransaction( @PathVariable Long number) throws TransactionException {
+        return transactionServiceImpl.rollbackTransaction(number);
     }
 
 }

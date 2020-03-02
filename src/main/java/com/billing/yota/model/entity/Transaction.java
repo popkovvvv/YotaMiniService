@@ -13,12 +13,16 @@ public class Transaction {
     @GeneratedValue
     private Long id;
 
+    @Column(nullable = false)
     private LocalDateTime transfer_at;
 
+    @Column(nullable = false)
     private Long origin;
 
+    @Column(nullable = false)
     private Long receiver;
 
+    @Column(nullable = false)
     private Double amount;
 
     private boolean isWasRefund;
