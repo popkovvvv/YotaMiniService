@@ -23,7 +23,6 @@ public class TransactionDAO {
     @PersistenceContext
     private EntityManager manager;
 
-    @Transactional
     public void create(TransferPOJO transferPOJO) {
         manager.createNativeQuery(
                 "INSERT INTO transaction (amount, transfer_at, origin, receiver) VALUES (?,?,?,?)")
@@ -34,7 +33,6 @@ public class TransactionDAO {
                 .executeUpdate();
     }
 
-    @Transactional
     public List<Transaction> getListByNumber(long number) {
         return manager.createQuery(
                 "select tr FROM Transaction tr WHERE tr.origin = :o ", Transaction.class)
@@ -42,7 +40,6 @@ public class TransactionDAO {
                 .getResultList();
     }
 
-    @Transactional
     public Transaction getLastTransactionByNumber(long number) {
         return manager.createQuery(
                 "SELECT tr FROM Transaction tr where tr.origin = :o ORDER BY tr.transfer_at DESC", Transaction.class)
@@ -50,4 +47,12 @@ public class TransactionDAO {
                 .setMaxResults(1)
                 .getSingleResult();
     }
+
+    public void updateRefund(Transaction transaction) {
+        manager.createQuery("update Transaction tr set Transaction.isWasRefund = :r where tr.id = :id")
+                .setParameter("r", transaction.isWasRefund())
+                .setParameter("id", transaction.getId())
+                .executeUpdate();
+    }
+
 }

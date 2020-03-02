@@ -8,6 +8,8 @@ import com.billing.yota.model.pojo.TransferPOJO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
 public class AccountService {
 
@@ -17,29 +19,49 @@ public class AccountService {
     @Autowired
     TransactionService transactionService;
 
+    @Transactional
     public void create(Account account) {
         accountDAO.create(account);
     }
 
+    @Transactional
     public Account findByNumber(long number) {
       return accountDAO.findByNumber(number);
     }
 
-    public void transaction(long from, long to, double amount) throws TransactionException {
-        accountDAO.transaction(from, to, amount);
+    @Transactional(rollbackOn = TransactionException.class)
+    public void transaction(Long fromAccountNumber, Long toAccountNumber, double amount) throws TransactionException {
+        changeBalance(toAccountNumber, amount);
+        changeBalance(fromAccountNumber, -amount);
     }
 
+    //TODO: перенести в бизнес логику
+    @Transactional
+    public void changeBalance(long number, double amount) throws TransactionException {
+        Account accountInfo = findByNumber(number);
+        if (accountInfo == null) {
+            throw new TransactionException("Account not found " + number);
+        }
+        double newBalance = accountInfo.getBalance() + amount;
+        if (newBalance < 0) {
+            throw new TransactionException(
+                    "The money in the account '" + number + "' is not enough (" + accountInfo.getBalance() + ")");
+        }
+        if (!accountInfo.isCanTransfer()) {
+            throw new TransactionException("Account " + number + " has blocked");
+        }
+        // Update to DB
+        accountDAO.changeBalance(number, newBalance);
+    }
+
+    @Transactional
     public void updateAccountTransfer(long number, boolean isCan) {
         accountDAO.update(number, isCan);
     }
 
-    public boolean checkTransaction(long number) {
-        return accountDAO.checkTransaction(number);
-    }
-
-    public void rollbackTransaction(long number) throws TransactionException {
-       Transaction transaction = transactionService.getLastTransactionByNumber(number);
-       transaction(transaction.getReceiver(), transaction.getOrigin(), transaction.getAmount());
+    @Transactional
+    public boolean checkTransfer(long number) {
+        return accountDAO.checkTransfer(number);
     }
 
 

@@ -1,5 +1,6 @@
 package com.billing.yota.controller;
 
+import com.billing.yota.exception.TransactionException;
 import com.billing.yota.model.entity.Transaction;
 import com.billing.yota.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,11 @@ public class TransactionController {
     @GetMapping("/history/{number}")
     public List<Transaction> getHistoryByNumber( @PathVariable Long number ) {
         return transactionService.getHistoryByNumber(number);
+    }
+
+    @GetMapping("/account/transaction/rollback/{number}")
+    public void getRollBackTransaction(@PathVariable Long number) throws TransactionException {
+        transactionService.rollbackTransaction(number);
     }
 
 }

@@ -21,6 +21,9 @@ public class Transaction {
 
     private Double amount;
 
+    private boolean isWasRefund;
+
+
     public Long getId() {
         return id;
     }
@@ -59,5 +62,13 @@ public class Transaction {
 
     public void setReceiver( Long receiver ) {
         this.receiver = receiver;
+    }
+
+    public boolean isWasRefund() {
+        return isWasRefund;
+    }
+
+    public void setWasRefund( boolean wasRefund ) {
+        isWasRefund = wasRefund;
     }
 }

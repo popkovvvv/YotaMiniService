@@ -15,12 +15,10 @@ public class AccountDAO {
     @PersistenceContext
     private EntityManager manager;
 
-    @Transactional
     public void create(Account account) {
         manager.persist(account);
     }
 
-    @Transactional
     public void update(long number, boolean isCan) {
         Query query = manager.createNativeQuery("UPDATE account SET is_can_transfer= :p where number = :n");
         query.setParameter("p", isCan);
@@ -28,7 +26,7 @@ public class AccountDAO {
         query.executeUpdate();
     }
 
-    public boolean checkTransaction(long number) {
+    public boolean checkTransfer(long number) {
         return manager.createQuery(
                 "select account.isCanTransfer from Account account where account.number = :n", Boolean.class)
                 .setParameter("n", number)
@@ -42,35 +40,12 @@ public class AccountDAO {
                 .getSingleResult();
     }
 
-    //TODO: перенести в бизнес логику
-    @Transactional
-    public void changeBalance(long number, double amount) throws TransactionException {
-        Account accountInfo = this.findByNumber(number);
-        if (accountInfo == null) {
-            throw new TransactionException("Account not found " + number);
-        }
-        double newBalance = accountInfo.getBalance() + amount;
-        if (accountInfo.getBalance() + amount < 0) {
-            throw new TransactionException(
-                    "The money in the account '" + number + "' is not enough (" + accountInfo.getBalance() + ")");
-        }
-        if (!accountInfo.isCanTransfer()) {
-            throw new TransactionException(
-                    "Account " + number + " has blocked");
-        }
-        accountInfo.setBalance(newBalance);
-        // Update to DB
+    public void changeBalance(long number, double balance) {
         manager.createQuery(
                 "Update Account account set account.balance = :p where account.number = :i")
-                .setParameter("p", accountInfo.getBalance())
+                .setParameter("p", balance)
                 .setParameter("i", number)
                 .executeUpdate();
-    }
-
-    @Transactional(rollbackOn = TransactionException.class)
-    public void transaction(Long fromAccountNumber, Long toAccountNumber, double amount) throws TransactionException {
-        changeBalance(toAccountNumber, amount);
-        changeBalance(fromAccountNumber, -amount);
     }
 
 
