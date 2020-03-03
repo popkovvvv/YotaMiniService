@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.math.BigDecimal;
 
 @Repository
 public class AccountDaoImpl implements AccountDao {
@@ -19,7 +20,7 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public void update(long number, boolean isCan) {
+    public void update(int number, boolean isCan) {
         Query query = manager.createNativeQuery("UPDATE account SET is_can_transfer= :p where number = :n");
         query.setParameter("p", isCan);
         query.setParameter("n", number);
@@ -27,7 +28,7 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public boolean checkTransfer(long number) {
+    public boolean checkTransfer(int number) {
         return manager.createQuery(
                 "select account.isCanTransfer from Account account where account.number = :n", Boolean.class)
                 .setParameter("n", number)
@@ -35,7 +36,7 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public Account findByNumber(long number) {
+    public Account findByNumber(int number) {
         return manager.createQuery(
                 "SELECT account from Account account where account.number = :p", Account.class)
                 .setParameter("p", number)
@@ -43,7 +44,7 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public void changeBalance(long number, double balance) {
+    public void changeBalance(int number, BigDecimal balance) {
         manager.createQuery(
                 "Update Account account set account.balance = :p where account.number = :i")
                 .setParameter("p", balance)

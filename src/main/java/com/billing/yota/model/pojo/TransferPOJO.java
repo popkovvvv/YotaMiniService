@@ -1,31 +1,33 @@
 package com.billing.yota.model.pojo;
 
-public class TransferPOJO {
-    private long fromAccountNumber;
-    private long toAccountNumber;
-    private double amount;
+import java.math.BigDecimal;
 
-    public long getFromAccountNumber() {
+public class TransferPOJO {
+    private Integer fromAccountNumber;
+    private Integer toAccountNumber;
+    private BigDecimal amount;
+
+    public Integer getFromAccountNumber() {
         return fromAccountNumber;
     }
 
-    public void setFromAccountNumber( long fromAccountNumber ) {
+    public void setFromAccountNumber( Integer fromAccountNumber ) {
         this.fromAccountNumber = fromAccountNumber;
     }
 
-    public long getToAccountNumber() {
+    public Integer getToAccountNumber() {
         return toAccountNumber;
     }
 
-    public void setToAccountNumber( long toAccountNumber ) {
+    public void setToAccountNumber( Integer toAccountNumber ) {
         this.toAccountNumber = toAccountNumber;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount( double amount ) {
+    public void setAmount( BigDecimal amount ) {
         this.amount = amount;
     }
 }

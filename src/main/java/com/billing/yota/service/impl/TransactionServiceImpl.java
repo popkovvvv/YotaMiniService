@@ -30,25 +30,30 @@ public class TransactionServiceImpl implements TransactionsService {
 
     @Transactional
     @Override
-    public void create(TransferPOJO transferPOJO) {
-        transactionDaoImpl.create(transferPOJO);
+    public ResponseEntity<String> create(TransferPOJO transferPOJO) {
+        try {
+            transactionDaoImpl.create(transferPOJO);
+            return new ResponseEntity<>("Create completed", HttpStatus.ACCEPTED);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Create error", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<Transaction> getHistoryByNumber(long number) {
+    public List<Transaction> getHistoryByNumber(int number) {
         return transactionDaoImpl.getListByNumber(number);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public Transaction getLastTransactionByNumber(long number) {
+    public Transaction getLastTransactionByNumber(int number) {
         return transactionDaoImpl.getLastTransactionByNumber(number);
     }
 
     @Transactional
     @Override
-    public ResponseEntity<String> rollbackTransaction( long number) throws TransactionException {
+    public ResponseEntity<String> rollbackTransaction(int number) throws TransactionException {
         Transaction transaction = getLastTransactionByNumber(number);
         if (transaction.isWasRefund()) {
             throw new TransactionException("This transaction was completed previously!");
@@ -58,13 +63,13 @@ public class TransactionServiceImpl implements TransactionsService {
 
     @Transactional
     @Override
-    public ResponseEntity<String> refundMoney( Transaction transaction) {
+    public ResponseEntity<String> refundMoney(Transaction transaction) {
         try {
             Account to = accountDaoImpl.findByNumber(transaction.getOrigin());
             Account from = accountDaoImpl.findByNumber(transaction.getReceiver());
 
-            accountDaoImpl.changeBalance(to.getNumber(), to.getBalance() + transaction.getAmount());
-            accountDaoImpl.changeBalance(from.getNumber(), from.getBalance() - transaction.getAmount());
+            accountDaoImpl.changeBalance(to.getNumber(), to.getBalance().add(transaction.getAmount()));
+            accountDaoImpl.changeBalance(from.getNumber(), from.getBalance().subtract(transaction.getAmount()));
 
             transaction.setWasRefund(true);
             transactionDaoImpl.updateRefund(transaction);

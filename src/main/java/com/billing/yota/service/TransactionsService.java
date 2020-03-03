@@ -9,9 +9,9 @@ import java.util.List;
 
 public interface TransactionsService {
 
-    void create( TransferPOJO transferPOJO);
-    List<Transaction> getHistoryByNumber( long number);
-    Transaction getLastTransactionByNumber(long number);
-    ResponseEntity<String> rollbackTransaction( long number) throws TransactionException;
-    ResponseEntity<String> refundMoney( Transaction transaction);
+    ResponseEntity<String> create( TransferPOJO transferPOJO);
+    List<Transaction> getHistoryByNumber(int number);
+    Transaction getLastTransactionByNumber(int number);
+    ResponseEntity<String> rollbackTransaction(int number) throws TransactionException;
+    ResponseEntity<String> refundMoney(Transaction transaction);
 }

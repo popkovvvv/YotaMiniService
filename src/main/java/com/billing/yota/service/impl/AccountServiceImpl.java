@@ -10,17 +10,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+
 @Service
 public class AccountServiceImpl implements AccountService {
 
     private final AccountDaoImpl accountDaoImpl;
 
-    private final TransactionServiceImpl transactionServiceImpl;
-
     @Autowired
-    public AccountServiceImpl(AccountDaoImpl accountDaoImpl, TransactionServiceImpl transactionServiceImpl) {
+    public AccountServiceImpl(AccountDaoImpl accountDaoImpl) {
         this.accountDaoImpl = accountDaoImpl;
-        this.transactionServiceImpl = transactionServiceImpl;
     }
 
     @Transactional
@@ -36,26 +35,26 @@ public class AccountServiceImpl implements AccountService {
 
     @Transactional(readOnly = true)
     @Override
-    public Account findByNumber(long number) {
+    public Account findByNumber(int number) {
       return accountDaoImpl.findByNumber(number);
     }
 
     @Transactional
     @Override
-    public void transaction(Long fromAccountNumber, Long toAccountNumber, double amount) throws TransactionException {
+    public void transaction(int fromAccountNumber, int toAccountNumber, BigDecimal amount) throws TransactionException {
         changeBalance(toAccountNumber, amount);
-        changeBalance(fromAccountNumber, -amount);
+        changeBalance(fromAccountNumber, amount.negate());
     }
 
     @Transactional
     @Override
-    public void changeBalance(long number, double amount) throws TransactionException {
+    public void changeBalance(int number, BigDecimal amount) throws TransactionException {
         Account accountInfo = findByNumber(number);
         if (accountInfo == null) {
             throw new TransactionException("Account not found " + number);
         }
-        double newBalance = accountInfo.getBalance() + amount;
-        if (newBalance < 0) {
+        BigDecimal newBalance = accountInfo.getBalance().add(amount);
+        if (newBalance.compareTo(BigDecimal.valueOf(0)) > 0) {
             throw new TransactionException(
                     "The money in the account '" + number + "' is not enough (" + accountInfo.getBalance() + ")");
         }
@@ -68,7 +67,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Transactional
     @Override
-    public ResponseEntity<String> updateAccountTransfer(long number, boolean isCan) {
+    public ResponseEntity<String> updateAccountTransfer(int number, boolean isCan) {
         try {
             accountDaoImpl.update(number, isCan);
         } catch (Exception e) {
@@ -79,7 +78,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Transactional
     @Override
-    public ResponseEntity<String> checkTransfer(long number) {
+    public ResponseEntity<String> checkTransfer(int number) {
         boolean check =  accountDaoImpl.checkTransfer(number);
         if (check) {
             return new ResponseEntity<>("Account may transfer", HttpStatus.OK);

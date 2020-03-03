@@ -3,6 +3,7 @@ package com.billing.yota.model.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -16,12 +17,12 @@ public class Account {
     @Column(unique = true, nullable = false)
     private String fullName;
 
-    private double balance;
+    private BigDecimal balance;
 
     private boolean isCanTransfer;
 
     @Column(unique = true, nullable = false)
-    private Long number;
+    private Integer number;
 
     public Long getId() {
         return id;
@@ -39,19 +40,19 @@ public class Account {
         this.fullName = fullName;
     }
 
-    public double getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance( double balance ) {
+    public void setBalance( BigDecimal balance ) {
         this.balance = balance;
     }
 
-    public Long getNumber() {
+    public Integer getNumber() {
         return number;
     }
 
-    public void setNumber( Long number ) {
+    public void setNumber( Integer number ) {
         this.number = number;
     }
 

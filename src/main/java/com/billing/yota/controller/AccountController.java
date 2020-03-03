@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static java.lang.Integer.parseInt;
-
 @RestController
 @RequestMapping("api/v1")
 public class AccountController {
@@ -31,23 +29,23 @@ public class AccountController {
     }
 
     @GetMapping("/account/{number}")
-    public Account getAccount(@PathVariable Long number){
+    public Object getAccount(@PathVariable Integer number){
         return accountServiceImpl.findByNumber(number);
     }
 
     @PutMapping("/account/update")
-    public ResponseEntity<String> updateBlocked( @RequestParam Long number, @RequestParam Boolean transfer ){
+    public ResponseEntity<String> updateBlocked( @RequestParam Integer number, @RequestParam Boolean transfer ){
         return accountServiceImpl.updateAccountTransfer(number, transfer);
     }
 
     @PostMapping("/account/transaction")
-    public void transfer(@ModelAttribute("transfer") TransferPOJO transferPOJO ) throws TransactionException {
+    public ResponseEntity<String> transfer( @ModelAttribute("transfer") TransferPOJO transferPOJO ) throws TransactionException {
         accountServiceImpl.transaction(transferPOJO.getFromAccountNumber(), transferPOJO.getToAccountNumber(), transferPOJO.getAmount());
-        transactionServiceImpl.create(transferPOJO);
+        return transactionServiceImpl.create(transferPOJO);
     }
 
     @GetMapping("/account/transaction/check/{number}")
-    public ResponseEntity<String> getCheckTransaction( @PathVariable Long number){
+    public ResponseEntity<String> getCheckTransaction( @PathVariable Integer number){
         return accountServiceImpl.checkTransfer(number);
     }
 }

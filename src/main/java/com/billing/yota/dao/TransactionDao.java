@@ -8,8 +8,8 @@ import java.util.List;
 public interface TransactionDao {
 
     void create( TransferPOJO transferPOJO);
-    List<Transaction> getListByNumber( long number);
-    Transaction getLastTransactionByNumber(long number);
+    List<Transaction> getListByNumber(int number);
+    Transaction getLastTransactionByNumber(int number);
     void updateRefund(Transaction transaction);
 
 }

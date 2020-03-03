@@ -24,12 +24,12 @@ public class TransactionController {
     }
 
     @GetMapping("/history/{number}")
-    public List<Transaction> getHistoryByNumber( @PathVariable Long number ) {
+    public List<Transaction> getHistoryByNumber(@PathVariable Integer number ) {
         return transactionServiceImpl.getHistoryByNumber(number);
     }
 
     @GetMapping("/account/transaction/rollback/{number}")
-    public ResponseEntity<String> getRollBackTransaction( @PathVariable Long number) throws TransactionException {
+    public ResponseEntity<String> getRollBackTransaction(@PathVariable Integer number) throws TransactionException {
         return transactionServiceImpl.rollbackTransaction(number);
     }
 

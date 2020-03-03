@@ -26,16 +26,17 @@ public class TransactionDaoImpl implements TransactionDao {
     @Override
     public void create(TransferPOJO transferPOJO) {
         manager.createNativeQuery(
-                "INSERT INTO transaction (amount, transfer_at, origin, receiver) VALUES (?,?,?,?)")
+                "INSERT INTO transaction (amount, transfer_at, origin, receiver, is_was_refund) VALUES (?,?,?,?,?)")
                 .setParameter(1, transferPOJO.getAmount())
                 .setParameter(2, LocalDateTime.now())
                 .setParameter(3, transferPOJO.getFromAccountNumber())
                 .setParameter(4, transferPOJO.getToAccountNumber())
+                .setParameter(5, false)
                 .executeUpdate();
     }
 
     @Override
-    public List<Transaction> getListByNumber(long number) {
+    public List<Transaction> getListByNumber(int number) {
         return manager.createQuery(
                 "select tr FROM Transaction tr WHERE tr.origin = :o ", Transaction.class)
                 .setParameter("o", number)
@@ -43,7 +44,7 @@ public class TransactionDaoImpl implements TransactionDao {
     }
 
     @Override
-    public Transaction getLastTransactionByNumber(long number) {
+    public Transaction getLastTransactionByNumber(int number) {
         return manager.createQuery(
                 "SELECT tr FROM Transaction tr where tr.origin = :o ORDER BY tr.transfer_at DESC", Transaction.class)
                 .setParameter("o", number)

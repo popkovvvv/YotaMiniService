@@ -1,8 +1,7 @@
 package com.billing.yota.model.entity;
 
-import com.billing.yota.model.entity.Account;
-
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,13 +16,13 @@ public class Transaction {
     private LocalDateTime transfer_at;
 
     @Column(nullable = false)
-    private Long origin;
+    private Integer origin;
 
     @Column(nullable = false)
-    private Long receiver;
+    private Integer receiver;
 
     @Column(nullable = false)
-    private Double amount;
+    private BigDecimal amount;
 
     private boolean isWasRefund;
 
@@ -44,27 +43,27 @@ public class Transaction {
         this.transfer_at = transfer_at;
     }
 
-    public Double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount( Double amount ) {
+    public void setAmount( BigDecimal amount ) {
         this.amount = amount;
     }
 
-    public Long getOrigin() {
+    public Integer getOrigin() {
         return origin;
     }
 
-    public void setOrigin( Long origin ) {
+    public void setOrigin( Integer origin ) {
         this.origin = origin;
     }
 
-    public Long getReceiver() {
+    public Integer getReceiver() {
         return receiver;
     }
 
-    public void setReceiver( Long receiver ) {
+    public void setReceiver( Integer receiver ) {
         this.receiver = receiver;
     }
 
