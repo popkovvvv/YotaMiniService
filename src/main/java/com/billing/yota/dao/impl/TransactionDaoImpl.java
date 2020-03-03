@@ -1,5 +1,6 @@
 package com.billing.yota.dao.impl;
 
+import com.billing.yota.dao.TransactionDao;
 import com.billing.yota.dao.impl.AccountDaoImpl;
 import com.billing.yota.model.entity.Transaction;
 import com.billing.yota.model.pojo.TransferPOJO;
@@ -12,14 +13,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public class TransactionDaoImpl {
-
-    @Autowired
-    AccountDaoImpl accountDaoImpl;
+public class TransactionDaoImpl implements TransactionDao {
 
     @PersistenceContext
-    private EntityManager manager;
+    private final EntityManager manager;
 
+    @Autowired
+    public TransactionDaoImpl(EntityManager manager) {
+        this.manager = manager;
+    }
+
+    @Override
     public void create(TransferPOJO transferPOJO) {
         manager.createNativeQuery(
                 "INSERT INTO transaction (amount, transfer_at, origin, receiver) VALUES (?,?,?,?)")
@@ -30,6 +34,7 @@ public class TransactionDaoImpl {
                 .executeUpdate();
     }
 
+    @Override
     public List<Transaction> getListByNumber(long number) {
         return manager.createQuery(
                 "select tr FROM Transaction tr WHERE tr.origin = :o ", Transaction.class)
@@ -37,6 +42,7 @@ public class TransactionDaoImpl {
                 .getResultList();
     }
 
+    @Override
     public Transaction getLastTransactionByNumber(long number) {
         return manager.createQuery(
                 "SELECT tr FROM Transaction tr where tr.origin = :o ORDER BY tr.transfer_at DESC", Transaction.class)
@@ -45,6 +51,7 @@ public class TransactionDaoImpl {
                 .getSingleResult();
     }
 
+    @Override
     public void updateRefund(Transaction transaction) {
         manager.createQuery("UPDATE Transaction set isWasRefund = :r where id = :id")
                 .setParameter("r", transaction.isWasRefund())
