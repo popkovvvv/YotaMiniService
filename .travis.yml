@@ -2,13 +2,4 @@ language: java
 jdk:
   - oraclejdk8
 
-services:
-  - mysql
-  - xvfb
-
-addons:
-  apt:
-    sources:
-      - github-git-lfs-xenial
-    packages:
-      - git-lfs
+dist: trusty
