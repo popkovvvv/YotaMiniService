@@ -1,5 +1,7 @@
 # YotaMiniService
 
+[![Build Status](https://travis-ci.com/popkovvvv/YotaMiniService.svg?branch=master)](https://travis-ci.com/popkovvvv/YotaMiniService)
+
 # Сервис должен обеспечивать следующий функционал:
 
 - Пользовательский перевод от пользователя к пользователю по номеру телефона
