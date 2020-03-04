@@ -77,7 +77,7 @@ public class TransactionServiceImpl implements TransactionsService {
     @Override
     public ResponseEntity<String> refundMoney(Transaction transaction) {
         try {
-            Account to = transactionService.accountService.findByNumber(transaction.getOrigin());
+            Account to = accountService.findByNumber(transaction.getOrigin());
             Account from = accountService.findByNumber(transaction.getReceiver());
 
             accountDaoImpl.changeBalance(to.getNumber(), to.getBalance().add(transaction.getAmount()));
