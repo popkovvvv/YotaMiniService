@@ -80,7 +80,9 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     @Override
     public ResponseEntity<String> checkTransfer(int number) {
-        boolean check = accountDaoImpl.checkTransfer(number);
+        boolean check = accountDaoImpl.checkTransfer(number).orElseThrow(
+                () -> new ResourceNotFoundException("Transaction not found with origin number " + number)
+        );
         if (check) {
             return new ResponseEntity<>("Account may transfer", HttpStatus.OK);
         }

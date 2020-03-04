@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,11 +47,16 @@ public class TransactionDaoImpl implements TransactionDao {
 
     @Override
     public Optional<Transaction> getLastTransactionByNumber(int number) {
-        return Optional.ofNullable(manager.createQuery(
-                "SELECT tr FROM Transaction tr where tr.origin = :o ORDER BY tr.transfer_at DESC", Transaction.class)
-                .setParameter("o", number)
-                .setMaxResults(1)
-                .getSingleResult());
+        try {
+            return Optional.ofNullable(manager.createQuery(
+                    "SELECT tr FROM Transaction tr where tr.origin = :o ORDER BY tr.transfer_at DESC", Transaction.class)
+                    .setParameter("o", number)
+                    .setMaxResults(1)
+                    .getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
+
     }
 
     @Override

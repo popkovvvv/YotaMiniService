@@ -55,7 +55,7 @@ public class TransactionServiceImpl implements TransactionsService {
     @Override
     public Transaction getLastTransactionByNumber(int number) {
         return transactionDaoImpl.getLastTransactionByNumber(number).orElseThrow(
-                () -> new ResourceNotFoundException("Account not found " + number)
+                () -> new ResourceNotFoundException("Transaction with origin " + number)
         );
     }
 
