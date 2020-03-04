@@ -26,12 +26,16 @@ public class TransactionServiceImpl implements TransactionsService {
 
     private final AccountService accountService;
 
+    private final TransactionServiceImpl transactionService;
+
 
     @Autowired
-    public TransactionServiceImpl(AccountDaoImpl accountDaoImpl, TransactionDaoImpl transactionDaoImpl, AccountService accountService) {
+    public TransactionServiceImpl(AccountDaoImpl accountDaoImpl, TransactionDaoImpl transactionDaoImpl,
+                                  AccountService accountService, TransactionServiceImpl transactionService) {
         this.accountDaoImpl = accountDaoImpl;
         this.transactionDaoImpl = transactionDaoImpl;
         this.accountService = accountService;
+        this.transactionService = transactionService;
     }
 
     @Transactional
@@ -73,7 +77,7 @@ public class TransactionServiceImpl implements TransactionsService {
     @Override
     public ResponseEntity<String> refundMoney(Transaction transaction) {
         try {
-            Account to = accountService.findByNumber(transaction.getOrigin());
+            Account to = transactionService.accountService.findByNumber(transaction.getOrigin());
             Account from = accountService.findByNumber(transaction.getReceiver());
 
             accountDaoImpl.changeBalance(to.getNumber(), to.getBalance().add(transaction.getAmount()));
