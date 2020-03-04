@@ -103,12 +103,12 @@ public class AccountServiceImplTest {
         account.setNumber(12345678);
         account.setCanTransfer(true);
 
-        Mockito.doReturn(account.isCanTransfer())
+        Mockito.doReturn(Optional.of(account.isCanTransfer()))
                 .when(accountDao)
                 .checkTransfer(12345678);
 
-        boolean check = accountDao.checkTransfer(account.getNumber());
-        assertTrue(check);
+        Optional<Boolean> check = accountDao.checkTransfer(account.getNumber());
+        assertTrue(check.get());
     }
 
 }

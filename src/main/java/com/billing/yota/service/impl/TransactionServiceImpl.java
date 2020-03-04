@@ -26,16 +26,15 @@ public class TransactionServiceImpl implements TransactionsService {
 
     private final AccountService accountService;
 
-    private final TransactionServiceImpl transactionService;
-
+    @Autowired
+    private TransactionsService transactionService;
 
     @Autowired
     public TransactionServiceImpl(AccountDaoImpl accountDaoImpl, TransactionDaoImpl transactionDaoImpl,
-                                  AccountService accountService, TransactionServiceImpl transactionService) {
+                                  AccountService accountService) {
         this.accountDaoImpl = accountDaoImpl;
         this.transactionDaoImpl = transactionDaoImpl;
         this.accountService = accountService;
-        this.transactionService = transactionService;
     }
 
     @Transactional
@@ -66,7 +65,7 @@ public class TransactionServiceImpl implements TransactionsService {
     @Transactional
     @Override
     public ResponseEntity<String> rollbackTransaction(int number) throws TransactionException {
-        Transaction transaction = getLastTransactionByNumber(number);
+        Transaction transaction = transactionService.getLastTransactionByNumber(number);
         if (transaction.isWasRefund()) {
             throw new TransactionException("This transaction was completed previously!");
         }

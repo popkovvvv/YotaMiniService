@@ -12,12 +12,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 @Service
 public class AccountServiceImpl implements AccountService {
 
     private final AccountDaoImpl accountDaoImpl;
+
+    @Autowired
+    private AccountServiceImpl accountService;
 
     @Autowired
     public AccountServiceImpl(AccountDaoImpl accountDaoImpl) {
@@ -46,8 +48,8 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     @Override
     public void transaction(int fromAccountNumber, int toAccountNumber, BigDecimal amount) throws TransactionException {
-        changeBalance(toAccountNumber, amount);
-        changeBalance(fromAccountNumber, amount.negate());
+        accountService.changeBalance(toAccountNumber, amount);
+        accountService.changeBalance(fromAccountNumber, amount.negate());
     }
 
     @Transactional
