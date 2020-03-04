@@ -8,8 +8,10 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.ResponseEntity;
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,12 +38,12 @@ public class AccountServiceImplTest {
         account.setFullName("Alex");
         account.setNumber(1234);
 
-        Mockito.doReturn(account)
+        Mockito.doReturn(Optional.of(account))
                 .when(accountDao)
                 .findByNumber(1234);
 
-        Account find = accountDao.findByNumber(1234);
-        assertEquals(account.getNumber(), find.getNumber());
+        Optional<Account> find = accountDao.findByNumber(1234);
+        assertEquals(account.getNumber(), find.get().getNumber());
     }
 
     @Test
@@ -50,12 +52,14 @@ public class AccountServiceImplTest {
         account.setFullName("Alex");
         account.setNumber(1234);
 
-        Mockito.doReturn(account)
+        Mockito.doReturn(Optional.of(account))
                 .when(accountDao)
                 .findByNumber(1234);
 
-        assertNull(accountDao.findByNumber(123));
+        assertEquals(Optional.empty(), accountDao.findByNumber(122));
     }
+
+
 
     @Test
     public void changeBalance() {
@@ -65,18 +69,19 @@ public class AccountServiceImplTest {
         account.setBalance(BigDecimal.valueOf(2000));
         account.setCanTransfer(true);
 
-        Mockito.doReturn(account)
+        Mockito.doReturn(Optional.of(account))
                 .when(accountDao)
                 .findByNumber(12345);
 
-        Account find = accountDao.findByNumber(12345);
+        Optional<Account> find = accountDao.findByNumber(12345);
+        Account acc = find.get();
         BigDecimal amount = BigDecimal.valueOf(1000);
-        BigDecimal newBalance = find.getBalance().add(amount);
+        BigDecimal newBalance = acc.getBalance().add(amount);
 
         assertEquals(1, newBalance.compareTo(BigDecimal.valueOf(0)));
-        assertTrue(find.isCanTransfer());
+        assertTrue(acc.isCanTransfer());
 
-        Mockito.doNothing().when(accountDao).changeBalance(find.getNumber(), amount);
+        Mockito.doNothing().when(accountDao).changeBalance(acc.getNumber(), amount);
     }
 
 

@@ -6,8 +6,10 @@ import com.billing.yota.exception.TransactionException;
 import com.billing.yota.model.entity.Account;
 import com.billing.yota.model.entity.Transaction;
 import com.billing.yota.model.pojo.TransferPOJO;
+import com.billing.yota.service.AccountService;
 import com.billing.yota.service.TransactionsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,10 +24,14 @@ public class TransactionServiceImpl implements TransactionsService {
 
     private final TransactionDaoImpl transactionDaoImpl;
 
+    private final AccountService accountService;
+
+
     @Autowired
-    public TransactionServiceImpl(AccountDaoImpl accountDaoImpl, TransactionDaoImpl transactionDaoImpl) {
+    public TransactionServiceImpl(AccountDaoImpl accountDaoImpl, TransactionDaoImpl transactionDaoImpl, AccountService accountService) {
         this.accountDaoImpl = accountDaoImpl;
         this.transactionDaoImpl = transactionDaoImpl;
+        this.accountService = accountService;
     }
 
     @Transactional
@@ -48,7 +54,9 @@ public class TransactionServiceImpl implements TransactionsService {
     @Transactional(readOnly = true)
     @Override
     public Transaction getLastTransactionByNumber(int number) {
-        return transactionDaoImpl.getLastTransactionByNumber(number);
+        return transactionDaoImpl.getLastTransactionByNumber(number).orElseThrow(
+                () -> new ResourceNotFoundException("Account not found " + number)
+        );
     }
 
     @Transactional
@@ -65,8 +73,8 @@ public class TransactionServiceImpl implements TransactionsService {
     @Override
     public ResponseEntity<String> refundMoney(Transaction transaction) {
         try {
-            Account to = accountDaoImpl.findByNumber(transaction.getOrigin());
-            Account from = accountDaoImpl.findByNumber(transaction.getReceiver());
+            Account to = accountService.findByNumber(transaction.getOrigin());
+            Account from = accountService.findByNumber(transaction.getReceiver());
 
             accountDaoImpl.changeBalance(to.getNumber(), to.getBalance().add(transaction.getAmount()));
             accountDaoImpl.changeBalance(from.getNumber(), from.getBalance().subtract(transaction.getAmount()));

@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Repository
 public class AccountDaoImpl implements AccountDao {
@@ -36,11 +37,11 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public Account findByNumber(int number) {
-        return manager.createQuery(
+    public Optional<Account> findByNumber(int number) {
+        return Optional.ofNullable(manager.createQuery(
                 "SELECT account from Account account where account.number = :p", Account.class)
                 .setParameter("p", number)
-                .getSingleResult();
+                .getSingleResult());
     }
 
     @Override

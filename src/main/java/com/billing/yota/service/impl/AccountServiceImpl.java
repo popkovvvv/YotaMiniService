@@ -5,12 +5,14 @@ import com.billing.yota.exception.TransactionException;
 import com.billing.yota.model.entity.Account;
 import com.billing.yota.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -36,7 +38,9 @@ public class AccountServiceImpl implements AccountService {
     @Transactional(readOnly = true)
     @Override
     public Account findByNumber(int number) {
-      return accountDaoImpl.findByNumber(number);
+      return accountDaoImpl.findByNumber(number).orElseThrow(
+              () -> new ResourceNotFoundException("Account not found " + number)
+      );
     }
 
     @Transactional
@@ -50,9 +54,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void changeBalance(int number, BigDecimal amount) throws TransactionException {
         Account accountInfo = findByNumber(number);
-        if (accountInfo == null) {
-            throw new TransactionException("Account not found " + number);
-        }
         BigDecimal newBalance = accountInfo.getBalance().add(amount);
         if (newBalance.compareTo(BigDecimal.valueOf(0)) > 0) {
             throw new TransactionException(
@@ -79,7 +80,7 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     @Override
     public ResponseEntity<String> checkTransfer(int number) {
-        boolean check =  accountDaoImpl.checkTransfer(number);
+        boolean check = accountDaoImpl.checkTransfer(number);
         if (check) {
             return new ResponseEntity<>("Account may transfer", HttpStatus.OK);
         }

@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class TransactionDaoImpl implements TransactionDao {
@@ -44,12 +45,12 @@ public class TransactionDaoImpl implements TransactionDao {
     }
 
     @Override
-    public Transaction getLastTransactionByNumber(int number) {
-        return manager.createQuery(
+    public Optional<Transaction> getLastTransactionByNumber(int number) {
+        return Optional.ofNullable(manager.createQuery(
                 "SELECT tr FROM Transaction tr where tr.origin = :o ORDER BY tr.transfer_at DESC", Transaction.class)
                 .setParameter("o", number)
                 .setMaxResults(1)
-                .getSingleResult();
+                .getSingleResult());
     }
 
     @Override

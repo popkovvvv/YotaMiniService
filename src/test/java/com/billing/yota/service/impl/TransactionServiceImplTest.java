@@ -7,6 +7,7 @@ import com.billing.yota.exception.TransactionException;
 import com.billing.yota.model.entity.Account;
 import com.billing.yota.model.entity.Transaction;
 import com.billing.yota.model.pojo.TransferPOJO;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -15,11 +16,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -83,7 +87,7 @@ class TransactionServiceImplTest {
         transaction.setOrigin(123);
         transaction.setReceiver(1234);
 
-        Mockito.doReturn(transaction)
+        Mockito.doReturn(Optional.of(transaction))
                 .when(transactionDao)
                 .getLastTransactionByNumber(123);
 
@@ -94,6 +98,7 @@ class TransactionServiceImplTest {
     }
 
     @Test
+    @Transactional
     void rollbackTransaction() throws TransactionException {
         Transaction transaction = new Transaction();
         transaction.setWasRefund(false);
@@ -102,7 +107,7 @@ class TransactionServiceImplTest {
         transaction.setOrigin(123);
         transaction.setReceiver(1234);
 
-        Mockito.doReturn(transaction)
+        Mockito.doReturn(Optional.of(transaction))
                 .when(transactionDao)
                 .getLastTransactionByNumber(123);
 
@@ -110,7 +115,7 @@ class TransactionServiceImplTest {
         Mockito.verify(transactionDao, Mockito.times(1)).getLastTransactionByNumber(123);
     }
 
-    //TODO: НАПИСАТЬ ТЕСТ ДЛЯ ВОЗВРАТА ДЕНЕГ
+    //TODO: ДОДЕЛАТЬ ТЕСТ
     void refundMoney() {
         Transaction transaction = new Transaction();
         transaction.setWasRefund(true);
@@ -119,16 +124,36 @@ class TransactionServiceImplTest {
         transaction.setOrigin(123);
         transaction.setReceiver(1234);
 
+        Account account = new Account();
+        account.setBalance(BigDecimal.valueOf(10000));
+        account.setFullName("Nikita");
+        account.setNumber(123);
+
+        Account account2 = new Account();
+        account.setBalance(BigDecimal.valueOf(10000));
+        account.setFullName("Jane");
+        account.setNumber(1234);
+
+        Mockito.doReturn(Optional.of(account))
+                .when(accountDao)
+                .findByNumber(123);
+        Mockito.doReturn(Optional.of(account))
+                .when(accountDao)
+                .findByNumber(1234);
+
+        Mockito.doNothing()
+                .when(transactionDao)
+                .updateRefund(transaction);
+
+        Mockito.verify(accountDao, Mockito.times(2)).findByNumber(
+                ArgumentMatchers.anyInt()
+        );
+
+        Mockito.verify(transactionDao, Mockito.times(1)).updateRefund(
+                transaction
+        );
+
         ResponseEntity<String> stringResponseEntity = transactionService.refundMoney(transaction);
-
-        Mockito.verify(accountDao, Mockito.times(2)).findByNumber(ArgumentMatchers.anyInt());
-        Mockito.verify(accountDao, Mockito.times(2)).changeBalance(
-                123,
-                BigDecimal.valueOf(2000));
-        transaction.setWasRefund(true);
-        Mockito.verify(transactionDao, Mockito.times(1)).updateRefund(transaction);
-
-        assertEquals("Refund money", stringResponseEntity.getBody());
 
 
     }

@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 public interface AccountService {
 
     ResponseEntity<String> create( Account account);
-    Object findByNumber(int number);
+    Account findByNumber(int number);
     void transaction(int fromAccountNumber, int toAccountNumber, BigDecimal amount)  throws TransactionException;
     void changeBalance(int number, BigDecimal amount)  throws TransactionException;
     ResponseEntity<String> updateAccountTransfer(int number, boolean isCan);
